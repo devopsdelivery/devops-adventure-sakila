@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure App - IT Store</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+            transition: background-color 0.3s;
+        }
+
+        header nav a:hover, header nav a.active {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        form, .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        li {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        .divider {
+            margin: 20px 0;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <a href="#" onclick="showSection('createUserSection')" class="active">Create User</a>
+                <a href="#" onclick="showSection('viewUsersSection')">View Users</a>
+                <a href="#" onclick="showSection('viewProductsSection')">View Products</a>
+                <a href="#" onclick="showSection('viewUserProductsSection')">View User's Products</a>
+                <a href="#" onclick="showSection('purchaseProductsSection')">Purchase Products</a>
+            </nav>
+        </header>
+        <div class="content">
+            <div id="createUserSection" class="section active">
+                <h2>Create a New User</h2>
+                <form id="userForm">
+                    <input type="number" id="userId" placeholder="User ID" required />
+                    <input type="text" id="userName" placeholder="User Name" required />
+                    <input type="email" id="userEmail" placeholder="User Email" required />
+                    <button type="submit">Create User</button>
+                </form>
+            </div>
+
+            <div id="viewUsersSection" class="section">
+                <h2>List of Users</h2>
+                <div class="actions">
+                    <button onclick="getUsers()">Get Users</button>
+                    <ul id="usersList"></ul>
+                </div>
+            </div>
+
+            <div id="viewProductsSection" class="section">
+                <h2>List of Products</h2>
+                <div class="actions">
+                    <button onclick="getProducts()">Get Products</button>
+                    <ul id="productsList"></ul>
+                </div>
+            </div>
+
+            <div id="viewUserProductsSection" class="section">
+                <h2>Products Bought by a User</h2>
+                <div class="actions">
+                    <input type="number" id="userIdToFetch" placeholder="User ID" required />
+                    <button onclick="getUserProducts()">Get User Products</button>
+                    <ul id="userProductsList"></ul>
+                </div>
+            </div>
+
+            <div id="purchaseProductsSection" class="section">
+                <h2>Purchase Products</h2>
+                <div class="actions">
+                    <input type="number" id="userIdToPurchase" placeholder="User ID" required />
+                    <input type="text" id="productIds" placeholder="Product IDs (comma-separated)" required />
+                    <button onclick="purchaseProducts()">Purchase Products</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "http://127.0.0.1:8000";
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`nav a[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
+
+        document.getElementById("userForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const userId = parseInt(document.getElementById("userId").value);
+            const userName = document.getElementById("userName").value.trim();
+            const userEmail = document.getElementById("userEmail").value.trim();
+
+            if (!userId || !userName || !userEmail) {
+                alert("Please enter a valid user ID, name, and email.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/users`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: userId, name: userName, email: userEmail }),
+                });
+                if (response.ok) {
+                    alert("User created successfully!");
+                    document.getElementById("userId").value = '';
+                    document.getElementById("userName").value = '';
+                    document.getElementById("userEmail").value = '';
+                    getUsers();
+                } else {
+                    const errorData = await response.json();
+                    console.error("Error:", errorData);
+                    alert(errorData.detail);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred.");
+            }
+        });
+
+        async function getUsers() {
+            try {
+                const response = await fetch(`${apiUrl}/users`);
+                const users = await response.json();
+                const usersList = document.getElementById("usersList");
+                usersList.innerHTML = "";
+                users.forEach(user => {
+                    const li = document.createElement("li");
+                    li.textContent = `${user.id} - ${user.name} (${user.email})`;
+                    usersList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function getProducts() {
+            try {
+                const response = await fetch(`${apiUrl}/products`);
+                const products = await response.json();
+                const productsList = document.getElementById("productsList");
+                productsList.innerHTML = "";
+                products.forEach(product => {
+                    const li = document.createElement("li");
+                    li.textContent = `${product.id} - ${product.name} ($${product.price})`;
+                    productsList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function getUserProducts() {
+            const userId = document.getElementById("userIdToFetch").value;
+            try {
+                const response = await fetch(`${apiUrl}/users/${userId}/products`);
+                if (response.ok) {
+                    const products = await response.json();
+                    const userProductsList = document.getElementById("userProductsList");
+                    userProductsList.innerHTML = "";
+                    products.forEach(product => {
+                        const li = document.createElement("li");
+                        li.textContent = `${product.id} - ${product.name} ($${product.price})`;
+                        userProductsList.appendChild(li);
+                    });
+                } else {
+                    alert("User not found or no products available for this user.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function purchaseProducts() {
+            const userId = parseInt(document.getElementById("userIdToPurchase").value);
+            const productIdsString = document.getElementById("productIds").value.trim();
+
+            if (!userId || !productIdsString) {
+                alert("Please enter a valid user ID and product IDs.");
+                return;
+            }
+
+            const productIds = productIdsString.split(',').map(id => parseInt(id.trim()));
+
+            try {
+                const response = await fetch(`${apiUrl}/users/${userId}/purchase`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ product_ids: productIds }),
+                });
+                if (response.ok) {
+                    alert("Products purchased successfully!");
+                } else {
+                    const errorData = await response.json();
+                    console.error("Error:", errorData);
+                    alert(errorData.detail);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred.");
+            }
+        }
+    </script>
+</body>
+</html>

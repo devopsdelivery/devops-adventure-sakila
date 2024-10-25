@@ -1,9 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List
 
 class User(BaseModel):
     id: int
     name: str
+    email: EmailStr
 
 class Product(BaseModel):
     id: int
@@ -11,5 +12,4 @@ class Product(BaseModel):
     price: float
 
 class UserProducts(BaseModel):
-    user_id: int
     product_ids: List[int]
