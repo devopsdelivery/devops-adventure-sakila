@@ -9,8 +9,24 @@ Only merged via pull requests (PRs), always a review needed, restricted to other
 Must pass all tests and code reviews before merging.
 
 2. Development Branch
-Name: develop
+Name: development
 Purpose: The integration branch for features and fixes. All completed work should be merged here before release.
 Merge Strategy:
 PRs should be merged into develop once code reviews are approved.
 Continuous integration (CI) checks must pass.
+
+Working Strategies :
+
+Francisco Pereira : 
+
+Chapter 3.2 - Database Setup - Postgres
+Chapter 4 - Data Model
+Chapter 5 - Database Migrations
+Chapter 9 - Closing the loop
+
+Xavier Ricarte :
+
+Chapter 6 - Developing the application
+Chapter 7 - Dockerize the application
+Chapter 8 - Defining and implmenting the pipeline (CI)
+Chapter 9 - Closing the loop
