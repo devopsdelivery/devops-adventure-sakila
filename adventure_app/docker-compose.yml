@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: devops-adventure-sakila
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  flyway:
+    image: flyway/flyway:9.1.4
+    container_name: flyway_migration
+    command: -url=jdbc:postgresql://db:5432/appdb -user=user -password=password -locations=filesystem:/flyway/sql migrate
+    volumes:
+      - ./flyway/sql:/flyway/sql
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/appdb
+    depends_on:
+      - db
+      - flyway
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
