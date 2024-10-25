@@ -15,18 +15,9 @@ Merge Strategy:
 PRs should be merged into develop once code reviews are approved.
 Continuous integration (CI) checks must pass.
 
-Working Strategies :
+Members : 
 
-Francisco Pereira : 
+Francisco Pereira
+Xavier Ricarte
 
-Chapter 3.2 - Database Setup - Postgres
-Chapter 4 - Data Model
-Chapter 5 - Database Migrations
-Chapter 9 - Closing the loop
 
-Xavier Ricarte :
-
-Chapter 6 - Developing the application
-Chapter 7 - Dockerize the application
-Chapter 8 - Defining and implmenting the pipeline (CI)
-Chapter 9 - Closing the loop
