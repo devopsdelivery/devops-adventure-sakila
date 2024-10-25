@@ -2,25 +2,29 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:13
-    container_name: devops-adventure-sakila
+    image: postgres:17-alpine
+    container_name: adventuredb
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: appdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: adventuredb
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - adventure-network
 
   flyway:
-    image: flyway/flyway:9.1.4
+    image: flyway/flyway
     container_name: flyway_migration
-    command: -url=jdbc:postgresql://db:5432/appdb -user=user -password=password -locations=filesystem:/flyway/sql migrate
+    command: -url=jdbc:postgresql://db:5432/adventuredb  -user=postgres -password=postgres -connectRetries=60 migrate
     volumes:
-      - ./flyway/sql:/flyway/sql
+      - ./migrations:/flyway/sql
     depends_on:
       - db
+    networks:
+      - adventure-network
 
   web:
     build:
@@ -28,12 +32,17 @@ services:
       dockerfile: Dockerfile
     container_name: fastapi_app
     environment:
-      DATABASE_URL: postgresql://user:password@db:5432/appdb
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/adventuredb
     depends_on:
       - db
       - flyway
     ports:
       - "8000:8000"
+    networks:
+      - adventure-network
 
 volumes:
   postgres_data:
+
+networks:
+  adventure-network:
